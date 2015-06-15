@@ -3,15 +3,19 @@ import json
 from os import walk, path
 
 import pytest
-from pact import Fragment
+from pact import RequestFragment, ResponseFragment
 
 
 def get_path():
     return '/home/eric/github/python-pact/pact-specification/testcases'
 
 
-def get_request_body_path():
-    return get_path() + '/request/body/'
+def get_request_path():
+    return get_path() + '/request/'
+
+
+def get_response_path():
+    return get_path() + '/response/'
 
 
 def get_spec_files(filepath):
@@ -29,9 +33,9 @@ def get_spec_from_file(filename):
 
 @pytest.mark.parametrize(
     'spec', [get_spec_from_file(filename) for filename in
-             get_spec_files(get_request_body_path())])
-def test_request_body_spec(spec):
-    fragment = Fragment(spec['expected'])
+             get_spec_files(get_request_path())])
+def test_request_specs(spec):
+    fragment = RequestFragment(spec['expected'])
     should_match = spec['match']
     actual = spec['actual']
     name = spec['comment']
@@ -39,5 +43,13 @@ def test_request_body_spec(spec):
     assert fragment.matches(actual) is should_match, name
 
 
-if __name__ == '__main__':
-    print([f for f in get_spec_files(get_request_body_path())])
+@pytest.mark.parametrize(
+    'spec', [get_spec_from_file(filename) for filename in
+             get_spec_files(get_response_path())])
+def test_response_specs(spec):
+    fragment = ResponseFragment(spec['expected'])
+    should_match = spec['match']
+    actual = spec['actual']
+    name = spec['comment']
+
+    assert fragment.matches(actual) is should_match, name
